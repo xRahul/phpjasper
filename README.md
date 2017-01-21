@@ -1,19 +1,33 @@
-# Reports for PHP and Laravel 5.*, with JasperReports.
+# PHPJasper
 
-[![StyleCI](https://styleci.io/repos/46984485/shield?branch=master)](https://styleci.io/repos/46984485)
+[![Build Status](https://travis-ci.org/geekcom/phpjasper.svg?branch=master)](https://travis-ci.org/geekcom/phpjasper)
 [![CircleCI](https://circleci.com/gh/geekcom/phpjasper/tree/master.svg?style=shield)](https://circleci.com/gh/geekcom/phpjasper/tree/master)
+[![StyleCI](https://styleci.io/repos/46984485/shield?branch=master)](https://styleci.io/repos/46984485)
 [![Latest Stable Version](https://poser.pugx.org/geekcom/phpjasper/v/stable)](https://packagist.org/packages/geekcom/phpjasper)
-[![License](https://poser.pugx.org/geekcom/phpjasper/license)](https://packagist.org/packages/geekcom/phpjasper) [![Total Downloads](https://poser.pugx.org/geekcom/phpjasper/downloads)](https://packagist.org/packages/geekcom/phpjasper)
+[![Total Downloads](https://poser.pugx.org/geekcom/phpjasper/downloads)](https://packagist.org/packages/geekcom/phpjasper)
+[![Latest Unstable Version](https://poser.pugx.org/geekcom/phpjasper/v/unstable)](https://packagist.org/packages/geekcom/phpjasper)
+[![License](https://poser.pugx.org/geekcom/phpjasper/license)](https://packagist.org/packages/geekcom/phpjasper) 
+[![Bitcoin Donations](https://img.shields.io/badge/bitcoin-donation-orange.svg)](https://blockchain.info/address/1LqwqcMfNuNzq6S671z1HjM61MpBuFCGqg)
 
-**Is using Linux servers?**
+###Docs
+[![Language-en_US](https://img.shields.io/badge/en__US-100%25-green.svg)](https://github.com/geekcom/phpjasper/blob/master/README.md)
+[![Language-pt_BR](https://img.shields.io/badge/pt__BR-0%25-red.svg)](#)
 
-Do not forget to grant permission 777 for the directory **/vendor/geekcom/phpjasper/src/JasperStarter/bin** and the file binary **jasperstarter**
 
-##Introduction
+###About
 
-This package aims to be a solution to compile and process JasperReports (.jrxml & .jasper files).
+This package is the solution to compile and process JasperReports (.jrxml & .jasper files) just using PHP.
 
-###Why?
+**Note for Linux servers?**
+
+Do not forget to grant permission 777 for the directory 
+**/vendor/geekcom/phpjasper/src/JasperStarter/bin** and the file binary **jasperstarter**
+
+**Do you need to generate Python reports?**
+
+Meet the **[pyreport](https://github.com/jadsonbr/pyreport)**
+
+###Why PHPJasper?
 
 Did you ever had to create a good looking Invoice with a lot of fields for your great web app?
 
@@ -43,24 +57,26 @@ Package to generate reports with [JasperReports 6.3.1](http://community.jasperso
 
 * Java JDK 1.8
 * PHP [exec()](http://php.net/manual/function.exec.php) function
-* [optional] [Mysql Connector](http://dev.mysql.com/downloads/connector/j/) (if you want to use database)
-* [optional] [PostgreSQL Connector](https://jdbc.postgresql.org/download.html) (if you want to use database)
-* [optional] [Jaspersoft Studio](http://community.jaspersoft.com/project/jaspersoft-studio) (to draw and compile your reports)
 
-###Java
+##Optional
+
+* [Mysql JDBC Driver](http://dev.mysql.com/downloads/connector/j/) (If you want to use a database)
+* [PostgreSQL JDBC Driver](https://jdbc.postgresql.org/download.html) (If you want to use a database)
+* [Microsoft JDBC Drivers](https://www.microsoft.com/en-US/download/details.aspx?id=11774) (If you want to use a database)
+* [Jaspersoft Studio](http://community.jaspersoft.com/project/jaspersoft-studio) (to draw and compile your reports)
+
+###Java(JDK)
 
 Check if you already have Java installed:
 
 ```
-$ java -version
-java version "1.8.0_101"
-Java(TM) SE Runtime Environment (build 1.8.0_101-b13)
-Java HotSpot(TM) 64-Bit Server VM (build 25.101-b13, mixed mode)
+$ javac -version
+javac version 1.8.0_101
 ```
 
 If you get:
 
-    command not found: java
+    command not found: javac
 
 Then install it with: (Ubuntu/Debian)
 
@@ -72,7 +88,9 @@ To install on: (centOS/Fedora)
 
 To install on windows visit the link-> [JDK](http://www.oracle.com/technetwork/pt/java/javase/downloads/jdk8-downloads-2133151.html) and look for the most appropriate version for your system.
 
-Now run the `java -version` again and check if the output is ok.
+Now run the `javac -version` again and check if the output is ok.
+
+---------------------------------------------------------------------------------------------------------------------------
 
 ##Installation
 
@@ -95,6 +113,8 @@ And the just run:
     composer install
 
 and thats it.
+
+----------------------------------------------------------------------------------------------------------------------------
 
 ##Examples
 
@@ -139,9 +159,12 @@ $output = __DIR__ . '/vendor/geekcom/phpjasper/examples';
 $jasper = new JasperPHP;
 
 $jasper->process(
-    $input,
-    $output,
-    array("pdf", "rtf")
+    $input, //input
+    $output, //output
+	['pdf', 'rtf'], //formats
+	[],    //parameters
+	[],    //data_source
+	'en'   //locale
 )->execute();
 ```
 
@@ -173,40 +196,32 @@ foreach($output as $parameter_description)
 We can also specify parameters for connecting to database:
 
 ```php
-
 require __DIR__ . '/vendor/autoload.php';
 
 use JasperPHP\JasperPHP;    
 
-$input = __DIR__ . '/vendor/geekcom/phpjasper/examples/hello_world.jrxml';   
-$output = __DIR__ . '/vendor/geekcom/phpjasper/examples';    
-
-private $conn;
-
-public function __construct()
-{
-    $this->conn = [
-        'driver' => 'postgres',
-        'username' => 'DB_USERNAME',
-        'password' => 'DB_PASSWORD',
-        'host' => 'DB_HOST',
-        'database' => 'DB_DATABASE',
-        'schema' => 'DB_SCHEMA',
-        'port' => '5432'
-    ];
-}    
+$input = '/your_input_path/your_report.jasper';   
+$output = '/your_output_path';
+$format = 'pdf';
+$locale = 'en';
 
 $jasper = new JasperPHP;
 
 $jasper->process(
         $input,
         $output,
-        array("pdf", "rtf"),
-        array("php_version" => phpversion()),
-        $this->conn, 
-        true, 
-        true, 
-        'pt_BR' //LOCALE *note 2
+        $format,
+        [], //parameters
+        [
+            'driver' => 'postgres',
+            'username' => 'DB_USERNAME',
+            'password' => 'DB_PASSWORD',
+            'host' => 'DB_HOST',
+            'database' => 'DB_DATABASE',
+            'schema' => 'DB_SCHEMA',
+            'port' => '5432'
+	 ],
+        $locale
 )->execute();
 ```
 
@@ -214,9 +229,46 @@ $jasper->process(
 
 For a complete list of locales see [Supported Locales](http://www.oracle.com/technetwork/java/javase/java8locales-2095355.html)
 
-###Using JasperPHP with Laravel 5.*
+###Using MSSQL DataBase
 
-1. Install [Composer](http://getcomposer.org) if you don't have it.
+```php
+
+require __DIR__ . '/vendor/autoload.php';
+
+use JasperPHP\JasperPHP;
+
+$input = '/your_input_path/your_report.jasper or .jrxml';   
+$output = '/your_output_path';
+$format = 'pdf';
+$locale = 'en';
+
+$jdbc_dir = __DIR__ . '/vendor/geekcom/phpjasper/src/JasperStarter/jdbc/';
+
+$jasper = new JasperPHP;
+
+$jasper->process(
+        $input,
+        $output,
+        $format,
+        [], //parameters
+        [
+            'driver' => 'generic',
+            'host' => '127.0.0.1',
+            'port' => '1433',
+            'database' => 'DataBaseName',
+            'username' => 'UserName',
+            'password' => 'password',
+            'jdbc_driver' => 'com.microsoft.sqlserver.jdbc.SQLServerDriver',
+            'jdbc_url' => 'jdbc:sqlserver://127.0.0.1:1433;databaseName=Teste',
+            'jdbc_dir' => $jdbc_dir
+        ],
+        $locale
+    )->execute();
+```
+
+###[optional] How to use JasperPHP with Laravel 5.*
+
+* Install [Composer](http://getcomposer.org) if you don't have it.
 ```
 composer require geekcom/phpjasper
 ```
@@ -229,46 +281,51 @@ Or in your 'composer.json' file add:
     }
 }
 ```
-2. And the just run:
+
+* Just run:
 
     **composer update**
 
-3. Add to your config/app.php providers array:
+* Add to your config/app.php providers array:
 
     **JasperPHP\JasperPHPServiceProvider::class,**
 
-4. Create a folder **/report** on **/public directory**
+* Create a folder **/report** on **/public directory**
 
-5. Copy the file **hello_world.jrxml** in **/vendor/geekcom/phpjasper/examples** from directory: **/public/report**
+* Copy the file **hello_world.jrxml** in **/vendor/geekcom/phpjasper/examples** from directory: **/public/report**
 
-6. Run **php artisan serve**
+* Copy and paste the code below to your **route.php** file
 
-7. Access **localhost:8000/reports**
-
-8. Check the directory **/public/report**. You now have 3 files, `hello_world.pdf`, `hello_world.rtf` and `hello_world.xml`.
-
-**Below the code you will use in your route.php**
+**Note 3:** In laravel 5.3 your routes files it's located on directory /routes
 
 ```php
 use JasperPHP\JasperPHP;
 
 Route::get('/reports', function () {
     
-    $output = public_path() . '/report/'.time().'_hello_world';
     $report = new JasperPHP;
+    
     $report->process(
-        public_path() . '/report/hello_world.jrxml', 
-        $output, 
-        array('pdf', 'rtf', 'xml'),
-        array(),
-        array()  
+        public_path() . '/report/hello_world.jrxml', //input 
+        public_path() . '/report/'.time().'_hello_world', //output
+        ['pdf', 'rtf', 'xml'], //formats
+        [], //parameters
+        [],  //data_source
+        '', //locale
         )->execute();
 });
 ```
+
+* Run **php artisan serve**
+
+* Access **localhost:8000/reports**
+
+* Check the directory **/public/report**. You now have 3 files, `hello_world.pdf`, `hello_world.rtf` and `hello_world.xml`.
+
 In this example we generate reports pdf, rtf and xml.
 
 
-###Reports from a xml in PHP/Laravel 5.*
+###[optional] Reports from a xml in PHP/Laravel 5.*
 
 See how easy it is to generate a report with a source an XML file:
 
@@ -283,15 +340,18 @@ public function xmlToPdf()
         $data_file = public_path() . '/report/CancelAck.xml';
         $driver = 'xml';
         $xml_xpath = '/CancelResponse/CancelResult/ID';
+        $locale = 'en';
         
         $php_jasper = new JasperPHP;
         
         $php_jasper->process(
-            public_path() . '/report/CancelAck.jrxml',
-            $output,
-            array($ext),
-            array(),
-            array('data_file' => $data_file, 'driver' => $driver, 'xml_xpath' => $xml_xpath))->execute();
+            public_path() . '/report/CancelAck.jrxml', //input
+            $output, //output
+            [$ext], //formats
+            [], //parameters
+            ['data_file' => $data_file, 'driver' => $driver, 'xml_xpath' => $xml_xpath], //data_source
+            $locale //locale
+            )->execute();
     
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
@@ -327,7 +387,7 @@ to folder:
 **\public\report** 
 
 
-###Reports from a JSON File in PHP/Laravel 5.*
+###[optional] Reports from a JSON File in PHP/Laravel 5.*
 
 See how easy it is to generate a report with a source an JSON file:
 
@@ -342,15 +402,18 @@ public function jsonToPdf()
         $driver = 'json';
         $json_query= "contacts.person";
         $data_file = public_path() . '/report/contacts.json';
+        $locale = 'en';
             
         $php_jasper = new JasperPHP;
         
         $php_jasper->process(
-            public_path() . '/report/json.jrxml',
-            $output,
-            array($ext),
-            array(),
-            array('data_file' => $data_file, 'driver' => $driver, 'json_query' => $json_query))->execute();
+            public_path() . '/report/json.jrxml', //input
+            $output, //output
+            [$ext], //formats
+            [], //parameters
+            ['data_file' => $data_file, 'driver' => $driver, 'json_query' => $json_query],
+            $locale
+        )->execute();
     
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
@@ -394,6 +457,11 @@ We ship the [MySQL connector](http://dev.mysql.com/downloads/connector/j/) (v5.1
 
 We ship the [PostgreSQL](https://jdbc.postgresql.org/) (v9.4-1203) in the `/src/JasperStarter/jdbc/` directory.
 
+###MSSQL
+
+[Microsoft JDBC Drivers 6.0, 4.2, 4.1, and 4.0 for SQL Server
+](https://www.microsoft.com/en-us/download/details.aspx?displaylang=en&id=11774).
+
 ##Performance
 
 Depends on the complexity, amount of data and the resources of your machine (let me know your use case).
@@ -402,16 +470,20 @@ I have a report that generates a *Invoice* with a DB connection, images and mult
 
 ##Thanks
 
-Thanks to [Cenote GmbH](http://www.cenote.de/) for the [JasperStarter](http://jasperstarter.sourceforge.net/) tool.
+[Cenote GmbH](http://www.cenote.de/) for the [JasperStarter](http://jasperstarter.sourceforge.net/) tool.
 
-##Questions?
+[JetBrains](https://www.jetbrains.com/) for the [PhpStorm](https://www.jetbrains.com/phpstorm/) and all great tools.
 
-Open a [Issue](https://github.com/geekcom/phpjasper/issues) 
 
-##License
+##[Questions?](https://github.com/geekcom/phpjasper/issues)
+
+Open a new [Issue](https://github.com/geekcom/phpjasper/issues) or look for a closed issue
+
+
+##[License](https://github.com/geekcom/phpjasper/blob/master/LICENSE)
 
 MIT
 
-##Contribute
+##[Contribute](https://github.com/geekcom/phpjasper/blob/master/CONTRIBUTING.md)
 
 Contribute to the community PHP and Laravel, feel free to contribute, make a fork!!
